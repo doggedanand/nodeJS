@@ -4,7 +4,7 @@
 const fs = require('fs')
 const path = require('path')
 const folderPath = './indexi'
-const filePath = './indexi.txt'
+// const filePath = './indexi.txt'
 if (fs.existsSync(folderPath)){
     console.log("The file is extsts.")
 }else{
