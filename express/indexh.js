@@ -13,5 +13,7 @@ try {
 }
 
 console.log("Happend before file write.");
+
+// Get the current working directory
 // const currentDirectory = process.cwd;
 // console.log("Current working directory :", currentDirectory);
