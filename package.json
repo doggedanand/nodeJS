@@ -7,7 +7,7 @@
     "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "anand",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.0.1"
