@@ -21,7 +21,7 @@ connectToDatabase();
 async function insertData() {
   const database = client.db("my-first-db");
   const collection = database.collection("collection");
-  const data = { name: "anand", age: 22 };
+  const data = { name: "krishna", age: 24 };
   try {
     const result = await collection.insertOne(data);
     console.log("Inserted document with Id:", result.insertedId);
@@ -47,7 +47,7 @@ async function updateData() {
   }
 }
 
-updateData();
+// updateData();
 // Deleting data from the database
 async function deleteData() {
   const database = client.db("my-first-db");
@@ -62,7 +62,7 @@ async function deleteData() {
   }
 }
 
-deleteData();
+// deleteData();
 
 async function getData() {
   const database = client.db("my-first-db");
@@ -79,4 +79,4 @@ async function getData() {
   }
 }
 
-getData();
+// getData();
