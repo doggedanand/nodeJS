@@ -12,7 +12,7 @@
 // });
 
 // database integration
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const uri = "mongodb://localhost:27017/my-first-db";
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -33,33 +33,22 @@ connectToDatabase();
 
 // Create express server
 const express = require("express");
-// const db = require("./db");
 const app = express();
-
 const port = 3000;
 app.listen(port, () => {
   console.log("Server is listening on port : 3000");
 });
 
 app.get("/", function (req, res) {
-  const database = client.db("crud-node-mongodb");
-  database.collection("collection").find({}),
-    (err, result) => {
-      if (err) {
-        throw err;
-      }
-      console.log("Got the data from database", result);
-      res.send("result", result);
-    };
+  res.send("You are on homepage");
 });
 
 // Get method
 
-app.get("/get", async function (req, res) {
-  debugger;
+app.get("/users", async function (req, res) {
   try {
     const db = client.db("crud-node-mongodb");
-    const collection = db.collection("collection"); // Replace with your actual collection name
+    const collection = db.collection("collection");
 
     const data = await collection.find({}).toArray();
     res.json(data);
@@ -73,7 +62,7 @@ app.get("/get", async function (req, res) {
 
 // Post method
 
-app.post("/post", async function (req, res) {
+app.post("/addUser", async function (req, res) {
   const database = client.db("crud-node-mongodb");
   const collection = database.collection("collection");
 
@@ -95,15 +84,17 @@ app.post("/post", async function (req, res) {
 
 // Delete method
 
-app.delete("/delete/:id", async function (req, res) {
-  debugger;
+app.delete("/remove/:id", async function (req, res) {
+  console.log("deleted route");
   const database = client.db("crud-node-mongodb");
   const collection = database.collection("collection");
 
   const idToDelete = req.params.id;
-
+  console.log("user passed id ", idToDelete);
   try {
-    const result = await collection.deleteOne({ id: idToDelete });
+    const filter = { _id: new ObjectId(idToDelete) };
+    console.log("filter in delete route", filter);
+    const result = await collection.deleteOne(filter);
     if (result.deletedCount === 1) {
       console.log("Data deleted successfully!");
       res.send(`Data with ID ${idToDelete} deleted successfully!`);
@@ -113,6 +104,54 @@ app.delete("/delete/:id", async function (req, res) {
     }
   } catch (error) {
     console.error("Error deleting data:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Get user by ID
+app.get("/users/:id", async function (req, res) {
+  const idToFind = req.params.id;
+  console.log("getById request id is ", idToFind);
+
+  try {
+    const db = client.db("crud-node-mongodb");
+    const collection = db.collection("collection");
+
+    const user = await collection.findOne({ _id: new ObjectId(idToFind) });
+
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Update method
+
+app.put("updateUser/:id", async function (req, res) {
+  const database = client.db("crud-node-mongodb");
+  const collection = database.collection("collection");
+
+  const idToUpdate = req.params.id;
+  console.log("update request id is ", idToUpdate);
+  // Filter the data
+  const filter = { _id: new ObjectId(idToUpdate) };
+  console.log("filter is ", filter);
+  try {
+    // Update the document
+    const update = { $set: { name: "admin", age: 33 } };
+    const result = await collection.updateOne(filter, update);
+    if (result.modifiedCount === 1) {
+      res.status(200).send("User updated successfully");
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (err) {
+    console.error("Error updating data:", error);
     res.status(500).send("Internal Server Error");
   }
 });
