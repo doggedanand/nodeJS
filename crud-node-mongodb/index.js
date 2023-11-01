@@ -42,49 +42,77 @@ app.listen(port, () => {
 });
 
 app.get("/", function (req, res) {
-  res.send("Ok");
+  const database = client.db("crud-node-mongodb");
+  database.collection("collection").find({}),
+    (err, result) => {
+      if (err) {
+        throw err;
+      }
+      console.log("Got the data from database", result);
+      res.send("result", result);
+    };
 });
 
-// db();
-// app.get("/get", async function (req, res) {
-//   try {
-//     const db = client.db("crud-node-mongodb");
-//     const collection = db.collection("empCollection"); // Replace with your actual collection name
+// Get method
 
-//     const data = await collection.find({}).toArray();
-//     res.json(data);
-//   } catch (error) {
-//     console.error("Error fetching data:", error);
-//     res.status(500).send("Internal Server Error");
-//   }
+app.get("/get", async function (req, res) {
+  debugger;
+  try {
+    const db = client.db("crud-node-mongodb");
+    const collection = db.collection("collection"); // Replace with your actual collection name
 
-//   res.send("get method called");
-// });
+    const data = await collection.find({}).toArray();
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).send("Internal Server Error");
+  }
 
+  res.send("get method called");
+});
 
-app.post('/post', function (req,res){
-  const database = client.db('crud-node-collection')
-  const collection = database.collection("empCollection")
-  res.send('post method called')
-})
-// app.post("/post", async function (req, res) {
-//   const database = client.db("crud-node-mongodb");
-//   const collection = database.collection("collection");
+// Post method
 
-//   // Accessing data from query parameters
-//   const data = {
-//     name: req.query.name,
-//     age: parseInt(req.query.age), 
-//   };
+app.post("/post", async function (req, res) {
+  const database = client.db("crud-node-mongodb");
+  const collection = database.collection("collection");
 
-//   try {
-//     const result = await collection.insertOne(data);
-//     console.log("Inserted document with Id:", result.insertedId);
-//     res.send("post method called");
-//   } catch (err) {
-//     console.log("Error inserting data", err);
-//     res.status(500).send("Internal Server Error");
-//   }
-// });
+  // Accessing data from query parameters
+  const data = {
+    name: req.query.name,
+    age: parseInt(req.query.age),
+  };
 
-// app.delete("/delete", function (req, res) {});
+  try {
+    const result = await collection.insertOne(data);
+    console.log("Inserted document with Id:", result.insertedId);
+    res.send("post method called!!");
+  } catch (err) {
+    console.log("Error inserting data", err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Delete method
+
+app.delete("/delete/:id", async function (req, res) {
+  debugger;
+  const database = client.db("crud-node-mongodb");
+  const collection = database.collection("collection");
+
+  const idToDelete = req.params.id;
+
+  try {
+    const result = await collection.deleteOne({ id: idToDelete });
+    if (result.deletedCount === 1) {
+      console.log("Data deleted successfully!");
+      res.send(`Data with ID ${idToDelete} deleted successfully!`);
+    } else {
+      console.log(`No data found with ID ${idToDelete}`);
+      res.status(404).send(`No data found with ID ${idToDelete}`);
+    }
+  } catch (error) {
+    console.error("Error deleting data:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
