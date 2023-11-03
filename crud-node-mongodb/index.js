@@ -1,16 +1,3 @@
-// ====== need to undestand diffrence between node and express things =====
-
-// const http = require("http");
-// const server = http.createServer(function (req, res) {
-//   res.writeHead(200, { Content: "text/plain" });
-//   res.end("Hello World!");
-// });
-
-// const port = process.env.PORT || 3000;
-// server.listen(port, function () {
-//   console.log("Server is listning on port:", port);
-// });
-
 // database integration
 const { MongoClient, ObjectId } = require("mongodb");
 const uri = "mongodb://localhost:27017/my-first-db";
@@ -51,13 +38,12 @@ app.get("/users", async function (req, res) {
     const collection = db.collection("collection");
 
     const data = await collection.find({}).toArray();
+
     res.json(data);
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).send("Internal Server Error");
   }
-
-  res.send("get method called");
 });
 
 // Post method
@@ -132,7 +118,8 @@ app.get("/users/:id", async function (req, res) {
 
 // Update method
 
-app.put("updateUser/:id", async function (req, res) {
+app.put("/update/:id", async function (req, res) {
+  console.log("put requested by user");
   const database = client.db("crud-node-mongodb");
   const collection = database.collection("collection");
 
@@ -142,11 +129,18 @@ app.put("updateUser/:id", async function (req, res) {
   const filter = { _id: new ObjectId(idToUpdate) };
   console.log("filter is ", filter);
   try {
+    const data = {
+      name: req.query.name,
+      age: parseInt(req.query.age),
+    };
     // Update the document
-    const update = { $set: { name: "admin", age: 33 } };
+    console.log("url data ", data);
+    const update = { $set: { name: data.name, age: data.age } };
     const result = await collection.updateOne(filter, update);
     if (result.modifiedCount === 1) {
       res.status(200).send("User updated successfully");
+    } else if (result.matchedCount === 1) {
+      res.status(200).send("No changes to update!");
     } else {
       res.status(404).send("User not found");
     }
@@ -155,3 +149,5 @@ app.put("updateUser/:id", async function (req, res) {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
