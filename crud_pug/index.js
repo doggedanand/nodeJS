@@ -1,41 +1,31 @@
-// database integration
-const { MongoClient, ObjectId } = require("mongodb");
-const uri = "mongodb://localhost:27017/my-first-db";
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-});
-// Connecting to the database
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    console.log("Connected to MongoDB");
-    // Specify the database you want to use
-    const database = client.db("crud-node-mongodb");
-  } catch (err) {
-    console.error("Error connecting to MongoDB:", err);
-  }
-}
-
-connectToDatabase();
-
-// Create express server
+// create express server
 const express = require("express");
 const app = express();
+
+// define the port
 const port = 3000;
+// listening the server
 app.listen(port, () => {
-  console.log("Server is listening on port : 3000");
+  console.log("Server is listening on port :", port);
 });
 
+// export the database
+const client = require("./db");
+
+// app.use(express.static("public"));
+// set the view engine to pug
+app.set("view engine", "pug");
+// get method
 app.get("/", function (req, res) {
-  res.send("You are on homepage");
+  res.render("index");
 });
 
 // Get method
 
 app.get("/users", async function (req, res) {
   try {
-    const db = client.db("crud-node-mongodb");
-    const collection = db.collection("collection");
+    const db = client.db("pugDB");
+    const collection = db.collection("pugCollection");
 
     const data = await collection.find({}).toArray();
 
@@ -49,9 +39,8 @@ app.get("/users", async function (req, res) {
 // Post method
 
 app.post("/addUser", async function (req, res) {
-
-  const database = client.db("crud-node-mongodb");
-  const collection = database.collection("collection");
+  const database = client.db("pugDB");
+  const collection = database.collection("pugCollection");
 
   // Accessing data from query parameters
   const data = {
@@ -73,8 +62,8 @@ app.post("/addUser", async function (req, res) {
 
 app.delete("/remove/:id", async function (req, res) {
   console.log("deleted route");
-  const database = client.db("crud-node-mongodb");
-  const collection = database.collection("collection");
+  const database = client.db("pugDB");
+  const collection = database.collection("pugCollection");
 
   const idToDelete = req.params.id;
   console.log("user passed id ", idToDelete);
@@ -101,8 +90,8 @@ app.get("/users/:id", async function (req, res) {
   console.log("getById request id is ", idToFind);
 
   try {
-    const db = client.db("crud-node-mongodb");
-    const collection = db.collection("collection");
+    const db = client.db("pugDB");
+    const collection = db.collection("pugCollection");
 
     const user = await collection.findOne({ _id: new ObjectId(idToFind) });
 
@@ -121,8 +110,8 @@ app.get("/users/:id", async function (req, res) {
 
 app.put("/update/:id", async function (req, res) {
   console.log("put requested by user");
-  const database = client.db("crud-node-mongodb");
-  const collection = database.collection("collection");
+  const database = client.db("pugDB");
+  const collection = database.collection("pugCollection");
 
   const idToUpdate = req.params.id;
   console.log("update request id is ", idToUpdate);
@@ -150,5 +139,3 @@ app.put("/update/:id", async function (req, res) {
     res.status(500).send("Internal Server Error");
   }
 });
-
-
