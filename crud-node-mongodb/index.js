@@ -119,7 +119,7 @@ app.get("/users/:id", async function (req, res) {
 
 // Update method
 
-app.put("/update/:id", async function (req, res) {
+app.post("/update/:id", async function (req, res) {
   console.log("put requested by user");
   const database = client.db("crud-node-mongodb");
   const collection = database.collection("collection");

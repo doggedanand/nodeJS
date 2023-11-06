@@ -9,18 +9,35 @@ app.listen(port, () => {
   console.log("Server is listening on port :", port);
 });
 
+// used bodyparser ====================
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // export the database
 const client = require("./db");
+const { ObjectId } = require("mongodb");
 
-// app.use(express.static("public"));
 // set the view engine to pug
 app.set("view engine", "pug");
-// get method
-app.get("/", function (req, res) {
-  res.render("index");
+
+// open home page
+app.get("/", async function (req, res) {
+  try {
+    console.log("get called!");
+
+    const db = client.db("pugDB");
+    const collection = db.collection("pugCollection");
+
+    const data = await collection.find({}).toArray();
+
+    res.render("index", { users: data });
+  } catch (err) {
+    console.log("Error getting userData", err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-// Get method
+// show the all users
 
 app.get("/users", async function (req, res) {
   try {
@@ -36,51 +53,64 @@ app.get("/users", async function (req, res) {
   }
 });
 
-// Post method
+// add the users
 
 app.post("/addUser", async function (req, res) {
+  console.log("post method called");
+  const database = client.db("pugDB");
+  const collection = database.collection("pugCollection");
+  try {
+    // Accessing data from body parameters
+    const { name, age, gender, designation } = req.body;
+
+    // Create an object with the user data
+    const userData = {
+      name: name,
+      age: age,
+      gender: gender,
+      designation: designation,
+    };
+
+    const result = await collection.insertOne(userData);
+    console.log("===result===", result);
+  } catch (err) {
+    console.error("===err===", err);
+  }
+
+  res.redirect("/");
+});
+
+// delete user record
+
+app.get("/delete/:id", async function (req, res) {
+  console.log("deleted route called");
+  const idToDelete = req.params.id;
   const database = client.db("pugDB");
   const collection = database.collection("pugCollection");
 
-  // Accessing data from query parameters
-  const data = {
-    name: req.query.name,
-    age: parseInt(req.query.age),
-  };
-
   try {
-    const result = await collection.insertOne(data);
-    console.log("Inserted document with Id:", result.insertedId);
-    res.send("post method called!!");
+    const filter = { _id: new ObjectId(idToDelete) };
+    const result = await collection.deleteOne(filter);
+    console.log("deleted the record", result);
+    res.redirect("/");
   } catch (err) {
-    console.log("Error inserting data", err);
-    res.status(500).send("Internal Server Error");
+    console.log("Error deleting user record", err);
   }
 });
 
-// Delete method
-
-app.delete("/remove/:id", async function (req, res) {
-  console.log("deleted route");
+// open the edit form
+app.get("/edit/:id", async function (req, res) {
+  const idToEdit = req.params.id;
+  console.log("idToEdit", idToEdit);
   const database = client.db("pugDB");
   const collection = database.collection("pugCollection");
-
-  const idToDelete = req.params.id;
-  console.log("user passed id ", idToDelete);
   try {
-    const filter = { _id: new ObjectId(idToDelete) };
-    console.log("filter in delete route", filter);
-    const result = await collection.deleteOne(filter);
-    if (result.deletedCount === 1) {
-      console.log("Data deleted successfully!");
-      res.send(`Data with ID ${idToDelete} deleted successfully!`);
-    } else {
-      console.log(`No data found with ID ${idToDelete}`);
-      res.status(404).send(`No data found with ID ${idToDelete}`);
-    }
-  } catch (error) {
-    console.error("Error deleting data:", error);
-    res.status(500).send("Internal Server Error");
+    const filter = { _id: new ObjectId(idToEdit) };
+    const data = await collection.findOne(filter);
+
+    res.render("edit_form", { users: data });
+  } catch (err) {
+    console.log("Error in opening edit form", err);
   }
 });
 
@@ -108,28 +138,38 @@ app.get("/users/:id", async function (req, res) {
 
 // Update method
 
-app.put("/update/:id", async function (req, res) {
+app.post("/update/:id", async function (req, res) {
   console.log("put requested by user");
   const database = client.db("pugDB");
   const collection = database.collection("pugCollection");
 
   const idToUpdate = req.params.id;
   console.log("update request id is ", idToUpdate);
-  // Filter the data
+
   const filter = { _id: new ObjectId(idToUpdate) };
-  console.log("filter is ", filter);
+
   try {
     const data = {
-      name: req.query.name,
-      age: parseInt(req.query.age),
+      name: req.body.name,
+      age: parseInt(req.body.age),
+      gender: req.body.gender,
+      designation: req.body.designation,
     };
     // Update the document
-    console.log("url data ", data);
-    const update = { $set: { name: data.name, age: data.age } };
+    
+    const update = {
+      $set: {
+        name: data.name,
+        age: data.age,
+        gender: data.gender,
+        designation: data.designation,
+      },
+    };
     const result = await collection.updateOne(filter, update);
-    if (result.modifiedCount === 1) {
-      res.status(200).send("User updated successfully");
-    } else if (result.matchedCount === 1) {
+    console.log("result======", result);
+    if (result.modifiedCount === 1 && result.matchedCount === 1) {
+      res.redirect("/");
+    } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
       res.status(200).send("No changes to update!");
     } else {
       res.status(404).send("User not found");
