@@ -1,5 +1,4 @@
 
-
 doctype html
 html(lang="en")
     head
@@ -15,10 +14,10 @@ html(lang="en")
 
     body
         .container.mt-5
-            h5.bold.text-center Welcome to Node.js CRUD using MongoDB, Express.js, and Pug.
+            h3.bold.text-center Welcome to Node.js CRUD using MongoDB, Express.js, and Pug.
 
             //- Form for adding users
-            form
+            form(method="POST" action="/addUser")
                 .mb-3
                     label.form-label(for="name") Name*
                     input.form-control(type="text" id="name" name="name")
@@ -52,24 +51,16 @@ html(lang="en")
                         th(scope="col") Designation
                         th(scope="col") Action
                 tbody
+                    //- each loop to interate the data from database
+                    each user in users
+                        tr
+                            td= user.name
+                            td= user.age
+                            td= user.gender
+                            td= user.designation
+                            td
+                                a(href=`/edit/${user._id}` style="margin-right:5px") Edit
+                                a(href=`/delete/${user._id}`) Delete
 
-                    tr
-                        td Anand Vishwakarma
-                        td 22
-                        td Male
-                        td Jr. Developer
-                        td pending
 
-                    tr
-                        td Krishna Vishwakarma
-                        td 24
-                        td Male
-                        td Sr. Developer 
-                        td pending
-                    tr
-                        td John Deo
-                        td 35
-                        td Male
-                        td Team Lead   
-                        td pending     
 

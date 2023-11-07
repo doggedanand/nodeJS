@@ -1,0 +1,42 @@
+
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Crud-App
+
+    //- Bootstrap link
+    link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous")
+
+    //- Custom style link
+    style(rel='stylesheet' href='/crud_pug/public/css/style.css')
+
+  body
+    .container.mt-5
+      h5.bold.text-center Welcome to Node.js CRUD using MongoDB, Express.js, and Pug.
+
+      //- Form for updating users
+      form(method="POST" action=`/update/${users._id}`)
+        .mb-3
+          label.form-label(for="name") Name*
+          input.form-control(type="text" id="name" name="name" value=users.name)
+
+        .mb-3
+          label.form-label(for="age") Age*
+          input.form-control(type="number" id="age" name="age" value=users.age)
+
+        .mb-3
+          label.form-label(for="gender") Gender*
+          select.form-select(name="gender")
+            option(value="male" selected=users.gender==="male") Male
+            option(value="female" selected=users.gender==="female") Female
+            option(value="other" selected=users.gender==="other") Other
+
+        .mb-3
+          label.form-label(for="designation") Designation*
+          input.form-control(type="text" id="designation" name="designation" value=users.designation)
+
+        button.btn.btn-danger(type="submit") Update User
+
+
