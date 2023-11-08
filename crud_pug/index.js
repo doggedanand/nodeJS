@@ -9,6 +9,8 @@ app.listen(port, () => {
   console.log("Server is listening on port :", port);
 });
 
+// to tell the express that public dir has all assets file
+app.use(express.static(__dirname + '/public'))
 // used bodyparser ====================
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -156,7 +158,7 @@ app.post("/update/:id", async function (req, res) {
       designation: req.body.designation,
     };
     // Update the document
-    
+
     const update = {
       $set: {
         name: data.name,
