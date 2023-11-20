@@ -6,14 +6,17 @@ const app = express();
 const port = 3000;
 // listening the server
 app.listen(port, () => {
-  console.log("Server is listening on port :", port);
+  console.log(`Server is listening on port :http://localhost:${port}`);
 });
 
 // to tell the express that public dir has all assets file
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(__dirname + "/public"));
 // used bodyparser ====================
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// use the json data in request body
+app.use(express.json());
 
 // export the database
 const client = require("./db");
@@ -84,7 +87,7 @@ app.post("/addUser", async function (req, res) {
 
 // delete user record
 
-app.get("/delete/:id", async function (req, res) {
+app.delete("/delete/:id", async function (req, res) {
   console.log("deleted route called");
   const idToDelete = req.params.id;
   const database = client.db("pugDB");
@@ -92,21 +95,24 @@ app.get("/delete/:id", async function (req, res) {
 
   try {
     const filter = { _id: new ObjectId(idToDelete) };
+    console.log(typeof filter, "filter");
     const result = await collection.deleteOne(filter);
     console.log("deleted the record", result);
-    res.redirect("/");
+    return res.json({ status: 200 });
   } catch (err) {
     console.log("Error deleting user record", err);
   }
 });
 
 // open the edit form
-app.get("/edit/:id", async function (req, res) {
+app.get("/editUser/:id", async function (req, res) {
   const idToEdit = req.params.id;
+
   console.log("idToEdit", idToEdit);
   const database = client.db("pugDB");
   const collection = database.collection("pugCollection");
   try {
+    console.log("===collection");
     const filter = { _id: new ObjectId(idToEdit) };
     const data = await collection.findOne(filter);
 
@@ -140,14 +146,12 @@ app.get("/users/:id", async function (req, res) {
 
 // Update method
 
-app.post("/update/:id", async function (req, res) {
+app.put("/update/:id", async function (req, res) {
   console.log("put requested by user");
   const database = client.db("pugDB");
   const collection = database.collection("pugCollection");
 
   const idToUpdate = req.params.id;
-  console.log("update request id is ", idToUpdate);
-
   const filter = { _id: new ObjectId(idToUpdate) };
 
   try {
@@ -157,7 +161,7 @@ app.post("/update/:id", async function (req, res) {
       gender: req.body.gender,
       designation: req.body.designation,
     };
-    // Update the document
+    console.log("data of update form", data);
 
     const update = {
       $set: {
@@ -170,7 +174,7 @@ app.post("/update/:id", async function (req, res) {
     const result = await collection.updateOne(filter, update);
     console.log("result======", result);
     if (result.modifiedCount === 1 && result.matchedCount === 1) {
-      res.redirect("/");
+      res.json({ status: 200 });
     } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
       res.status(200).send("No changes to update!");
     } else {
