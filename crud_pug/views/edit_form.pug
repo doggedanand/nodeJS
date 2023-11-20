@@ -12,12 +12,13 @@ html(lang="en")
     //- Custom style link
     link(rel='stylesheet' href='/css/style.css')
 
+    //- JQuery link
+    script(src="https://code.jquery.com/jquery-3.6.4.min.js")
+
   body
     .container.mt-5
       h5.bold.text-center.color Welcome to Node.js CRUD using MongoDB, Express.js, and Pug.
-
-      //- Form for updating users
-      form(method="POST" action=`/update/${users._id}`)
+      form(method="PUT" action=`/update/${users._id}`)
         .mb-3
           label.form-label(for="name") Name*
           input.form-control(type="text" id="name" name="name" value=users.name required pattern="[a-zA-Z ]+$")
@@ -37,6 +38,44 @@ html(lang="en")
           label.form-label(for="designation") Designation*
           input.form-control(type="text" id="designation" name="designation" value=users.designation required pattern="[a-zA-Z ]+$")
 
-        button.btn.btn-danger(type="submit") Update User
+        button.btn.btn-danger(type="submit" data-id=users._id ) Update User
+
+    script.
+
+
+      $(document).ready(function () {
+        $("form").submit(function (event) {
+          event.preventDefault();
+
+          // get the user id from form attributes
+          const userId = $(this).attr("action").split("/")[2];
+
+
+          const formData = {
+            name: $("#name").val(),
+            age: $("#age").val(),
+            gender: $('select[name=gender]').val(),
+            designation: $("#designation").val(),
+          }; 
+
+          $.ajax({
+            type: "PUT",
+            url: `/update/${userId}`,
+            contentType: "application/json",
+            data: JSON.stringify(formData),
+            success: function (res) {
+
+              console.log("User updated successfully");
+              alert("User updated successfully")
+              window.location.href = "/";  
+            },
+            error: function (error) {
+
+              console.error("Error updating user:", error);
+            },
+          });
+        });
+      });
+
 
 
